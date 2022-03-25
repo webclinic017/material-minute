@@ -51,10 +51,13 @@ class TimeseriesTable:
                                    index, description, companyName, RedisTimeFrame.MIN2)
         name5 = self.addSymbolItem(rts, symbol, suffix, aggr,
                                    index, description, companyName, RedisTimeFrame.MIN5)
+        name5 = self.addSymbolItem(rts, symbol, suffix, aggr,
+                                   index, description, companyName, RedisTimeFrame.MIN15)
         # rts.createrule(name0, name1, aggr, 60*1000)
         if TimeseriesTable.isAutoAggregate:
             rts.createrule(name1, name2, aggr, 2*60)
             rts.createrule(name1, name5, aggr, 5*60)
+            rts.createrule(name1, name5, aggr, 15*60)
 
     def addRedisStockSymbol(self, rts, symbol, index, description, companyName):
         self.addSymbol(rts, symbol, "high", "max",
@@ -105,6 +108,7 @@ class TimeseriesTable:
         self.deleteRedisSymbol(rts, symbol, RedisTimeFrame.MIN1)
         self.deleteRedisSymbol(rts, symbol, RedisTimeFrame.MIN2)
         self.deleteRedisSymbol(rts, symbol, RedisTimeFrame.MIN5)
+        self.deleteRedisSymbol(rts, symbol, RedisTimeFrame.MIN15)
 
     def RemoveStock(self, symbol):
         self.deleteRedisStockSymbol(self.rts, symbol)

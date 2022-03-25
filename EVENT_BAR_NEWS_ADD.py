@@ -36,7 +36,7 @@ def AddNewsSymbol(symbol):
 #     def __init__(self):
 #         # StoreStack: class to access the redis Stack.
 #         self.subscriber = RedisSubscriber(
-#             PUBSUB_KEYS.EVENT_BAR_TRADE_ADD, None, self.addNewsSymbol)
+#             PUBSUB_KEYS.EVENT_BAR_POST_TO_SERVER, None, self.addNewsSymbol)
 #         self.url = os.environ.get(
 #             'URL_NEWS_SYMBOL', 'http://0.0.0.0:3004/symbol')
 
@@ -80,5 +80,5 @@ def AddNewsSymbol(symbol):
 #                         datefmt='%d-%b-%y %H:%M:%S', filename="three-bar.log")
 #     RedisEventAddNewsSymbol.run()
 #     data = {'symbol': 'FANG'}
-#     pub = RedisPublisher(PUBSUB_KEYS.EVENT_BAR_TRADE_ADD)
+#     pub = RedisPublisher(PUBSUB_KEYS.EVENT_BAR_POST_TO_SERVER)
 #     pub.publish({"symbol": "AAPL"})

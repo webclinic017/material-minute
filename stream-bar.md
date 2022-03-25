@@ -45,7 +45,7 @@ EVENT-BAR-CANDIDATE-CHECK (publish)
 
 #
 
-### EVENT_BAR_CANDIDATE_CHECK (subscribe)
+### EVENT_BAR_FILTER_VSA (subscribe)
 
 - (to) EVENT_BAR_CANDIDATE (subscribe)
 - (from) ThreeBarCandidate.py
@@ -100,7 +100,7 @@ EVENT-BAR-CANDIDATE-CHECK (publish)
 ```
 
 Run the 3 bar candiate testing (3, 4 bar testing)
-EVENT_BAR_TRADE_ADD (publish)
+EVENT_BAR_POST_TO_SERVER (publish)
 
 #
 

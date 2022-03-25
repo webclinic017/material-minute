@@ -37,6 +37,7 @@ class AlpacaHistorical:
             RedisTimeFrame.MIN1: datetime.now() - timedelta(minutes=30),
             RedisTimeFrame.MIN2: datetime.now() - timedelta(minutes=60),
             RedisTimeFrame.MIN5: datetime.now() - timedelta(minutes=150),
+            RedisTimeFrame.MIN15: datetime.now() - timedelta(minutes=450),
             RedisTimeFrame.MIN30: datetime.now() - timedelta(days=2),
             RedisTimeFrame.HOUR: datetime.now() - timedelta(days=28),
             RedisTimeFrame.DAILY: datetime.now() - timedelta(days=360),

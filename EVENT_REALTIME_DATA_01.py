@@ -64,6 +64,7 @@ def consumer_thread():
     conn = AlpacaStreamAccess.connection()
 
     conn.subscribe_bars(print_bar, '*')
+    # conn.subscribe_bars(print_bar, 'TSLA')
     global PREVIOUS
     PREVIOUS = "AAPL"
     conn.run()

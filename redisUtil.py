@@ -102,6 +102,7 @@ class RedisTimeFrame:
     MIN1 = "1Min"
     MIN2 = "2Min"
     MIN5 = "5Min"
+    MIN15 = "15Min"
     MIN30 = "30Min"
     HOUR = "Hour"
     DAILY = "1Day"
@@ -256,7 +257,8 @@ class TimeStamp:
             RedisTimeFrame.SEC10: 20 * minute,
             RedisTimeFrame.MIN1: 20 * minute,
             RedisTimeFrame.MIN2: 40 * minute,
-            RedisTimeFrame.MIN5: 2 * hour
+            RedisTimeFrame.MIN5: 2 * hour,
+            RedisTimeFrame.MIN15: 6 * hour,
         }
         dt = switcher.get(timeframe)
         return dt
@@ -279,7 +281,8 @@ class TimeStamp:
             RedisTimeFrame.MIN1: now_ms - (minute * 10),
             RedisTimeFrame.MIN2: now_ms - (minute * 20),
             RedisTimeFrame.MIN5: now_ms - (hour),
-            RedisTimeFrame.MIN30: now_ms - (hour * 4),
+            RedisTimeFrame.MIN15: now_ms - (hour * 3),
+            RedisTimeFrame.MIN30: now_ms - (hour * 6),
         }
         dt = switcher.get(timeframe)
         return dt
@@ -312,7 +315,8 @@ class TimeStamp:
             RedisTimeFrame.SEC10: 20 * minute,
             RedisTimeFrame.MIN1: 20 * minute,
             RedisTimeFrame.MIN2: 40 * minute,
-            RedisTimeFrame.MIN5: 2 * hour
+            RedisTimeFrame.MIN5: 2 * hour,
+            RedisTimeFrame.MIN15: 6 * hour,
         }
         dt = switcher.get(timeframe)
         return dt
@@ -334,9 +338,8 @@ class TimeStamp:
     def now_ns():
         return int(time.time_ns())
 
-
 class SetInterval:
-    def __init__(self, interval, action):
+    def __init__(self, interval:int, action:callable):
         self.interval = interval
         self.action = action
         self.stopEvent = threading.Event()

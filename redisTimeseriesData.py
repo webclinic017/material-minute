@@ -53,6 +53,7 @@ class ComposeData:
             RedisTimeFrame.MIN1: 60,
             RedisTimeFrame.MIN2: 120,
             RedisTimeFrame.MIN5: 300,
+            RedisTimeFrame.MIN15: 900,
         }
         mins = switcher.get(timeframe, 60)
         tstamps = []
@@ -190,6 +191,7 @@ class RealTimeBars:
             RedisTimeFrame.MIN1: 60,
             RedisTimeFrame.MIN2: 120,
             RedisTimeFrame.MIN5: 300,
+            RedisTimeFrame.MIN15: 900,
         }
         return switcher.get(timeframe, 60)
 
@@ -210,6 +212,8 @@ class RealTimeBars:
                 self.redisAddBarAggregate(symbol, RedisTimeFrame.MIN2, ts)
             if ts % RealTimeBars.getBackSeconds(RedisTimeFrame.MIN5) == 0:
                 self.redisAddBarAggregate(symbol, RedisTimeFrame.MIN5, ts)
+            if ts % RealTimeBars.getBackSeconds(RedisTimeFrame.MIN15) == 0:
+                self.redisAddBarAggregate(symbol, RedisTimeFrame.MIN15, ts)
         except Exception as e:
             logging.error(f'RedisAddBarAggregation: {e} {data} ')
             return None
@@ -234,7 +238,7 @@ class RealTimeBars:
             close_prices = rts.revrange(key, from_time=startt, to_time=endt)
             return close_prices
         except Exception as e:
-            logging.warning(f'_bar_realtime: {symbol} - {e}')
+            print(f'_bar_realtime: {symbol} - {e}')
             return []
 
     def _bar_realtime_adjust(self, rts, datatype, symbol, timeframe, startt, endt):
@@ -247,7 +251,7 @@ class RealTimeBars:
             result = composeData.AdjustBars(data, timeframe)
             return result
         except Exception as e:
-            logging.warning(f'_bar_realtime_adjust: {symbol} - {e}')
+            print(f'_bar_realtime_adjust: {symbol} - {e}')
             return []
         # if len(result) > 1:
         #     revResult = []
@@ -370,6 +374,7 @@ class RealTimeBars:
                 RedisTimeFrame.MIN1:  self.realtimeDataMinutes,
                 RedisTimeFrame.MIN2:  self.realtimeDataMinutes,
                 RedisTimeFrame.MIN5:  self.realtimeDataMinutes,
+                RedisTimeFrame.MIN15:  self.realtimeDataMinutes,
                 RedisTimeFrame.DAILY: self.realtimeDataHistorical
             }
             callMethod = switcher.get(timeframe)
@@ -380,35 +385,7 @@ class RealTimeBars:
             return RealTimeBars.TimeseriesRealtimeDataFormat("threebars", symbol, timeframe, data)
         except Exception as e:
             logging.warning(f'RedisGetRealtimeData: {symbol} - {e}')
-            return []
-            # close = callMethod(self.rts, 'close', symbol,
-            #                    timeframe, startt, endt)
-            # if timeframe == RedisTimeFrame.DAILY:
-            #     return close
-            # if timeframe == RedisTimeFrame.REALTIME:
-            #     volume = callMethod(self.rts, 'volume', symbol,
-            #                         timeframe, startt, endt)
-            #     data = self.mergeRealtimeData(
-            #         symbol, close, [], [], [], volume)
-            #     return close
-            # if close is None or len(close) < 5:
-            #     data = self._bar_historical(
-            #         symbol, timeframe, None, ts.DatetimeString(startt), ts.DatetimeString(endt))
-            #     return RealTimeBars.TimeseriesRealtimeDataFormat("threebars", symbol, timeframe, data)
-            # elif timeframe in (RedisTimeFrame.MIN1, RedisTimeFrame.MIN2, RedisTimeFrame.MIN5):
-            #     open = callMethod(self.rts, 'open', symbol,
-            #                       timeframe, startt, endt)
-            #     high = callMethod(self.rts, 'high', symbol,
-            #                       timeframe, startt, endt)
-            #     low = callMethod(self.rts, 'low', symbol,
-            #                      timeframe, startt, endt)
-            #     volume = callMethod(self.rts, 'volume', symbol,
-            #                         timeframe, startt, endt)
-            #     data = self.mergeRealtimeData(
-            #         symbol, close, open, high, low, volume)
-            #     return RealTimeBars.TimeseriesRealtimeDataFormat("threebars", symbol, timeframe, data)
-            # else:
-            #     return close
+            return {}
 
     def _get_active_stocks(self, rts, assets):
         # remove all active stocks

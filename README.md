@@ -264,9 +264,9 @@ curl --header 'Accept: text/event-stream' https://cloud-sse.iexapis.com/stable/s
 
 # TIMESERIES RANGE
 
-ts.range data_close_1MIN:FANG 0 -1
+ts.range data_close_1MIN:FANG 0 2000000000000000
 flushall
-keys \*
+keys *
 
 # test
 

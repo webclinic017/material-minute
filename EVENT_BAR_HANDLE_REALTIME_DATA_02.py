@@ -1,20 +1,20 @@
 import logging
+import datetime
 import json
+
+from redis import Redis
 from redisTimeseriesData import RealTimeBars
 from redisPubsub import RedisSubscriber, RedisPublisher
 from pubsubKeys import PUBSUB_KEYS
 from redisUtil import RedisTimeFrame
 
-
-class EventBarCandidate:
+class EventBarHandleRealtimeData:
     '''A 1-Minute Bar happened.  Save the data.  And get 2 min and 5 min data for analysis later.'''
 
     def __init__(self, pubDataCheck=None, pubDataSave=None):
         self.rtb = RealTimeBars()
-        self.publisher_check = RedisPublisher(
-            PUBSUB_KEYS.EVENT_BAR_CANDIDATE_CHECK) if pubDataCheck is None else pubDataCheck
-        self.publisher_save = RedisPublisher(
-            PUBSUB_KEYS.EVENT_BAR_SAVE) if pubDataSave is None else pubDataSave
+        self.publisher = RedisPublisher(
+            PUBSUB_KEYS.EVENT_BAR_FILTER_VSA) if pubDataCheck is None else pubDataCheck
         self.subscriber = RedisSubscriber(
             PUBSUB_KEYS.EVENT_BAR_CANDIDATE, None, self.AddBar)
 
@@ -25,15 +25,29 @@ class EventBarCandidate:
             "data": data
         }
 
+    def isTimeInterval(self, timeframe:str) -> bool:
+        timeIntervals = {
+            # RedisTimeFrame.MIN2: 2,
+            # RedisTimeFrame.MIN5: 5,
+            RedisTimeFrame.MIN15: 15
+        }
+        min = timeIntervals.get(timeframe, -1)
+        if min <= 0:
+            return False
+        moment = datetime.datetime.now()
+        if moment.minute % min == 0:
+            return True
+        return False
+
     def publish2Min(self, symbol: str, timeframe: str):
         data2 = self.rtb.RedisGetRealtimeData(None, symbol, timeframe)
-        logging.info(f"EventBarCandidate.publish2Min {symbol}")
-        arrLen = len(data2['data'])
-        if data2 is not None and arrLen >= 3:
-            self.publisher_check.publish(data2)
-        else:
-            logging.info(
-                f"EventBarCandidate.publish2Min: Not Enough {symbol} {timeframe} {arrLen}")
+        if isinstance(data2, dict):
+            arrLen = len(data2['data']) if 'data' in data2.keys() else 0
+            if data2 is not None and arrLen >= 3:
+                self.publisher.publish(data2)
+            else:
+                logging.info(
+                    f"EventBarHandleRealtimeData.publish2Min: Not Enough {symbol} {timeframe} {arrLen}")
 
     def AddBar(self, data=None):
         try:
@@ -42,15 +56,17 @@ class EventBarCandidate:
                 symbol = 'FANG'
             else:
                 symbol = data['S']
-                logging.info(
-                    f"EVENT_BAR_CANDIDATE.EventBarCandidate.AddBar: {symbol} - {data} ")
                 self.rtb.RedisAddBar(data)
                 self.rtb.RedisAddBarAggregation(data)
-            self.publish2Min(symbol, RedisTimeFrame.MIN2)
-            self.publish2Min(symbol, RedisTimeFrame.MIN5)
+            if self.isTimeInterval(RedisTimeFrame.MIN2):
+                self.publish2Min(symbol, RedisTimeFrame.MIN2)
+            if self.isTimeInterval(RedisTimeFrame.MIN5):
+                self.publish2Min(symbol, RedisTimeFrame.MIN5)
+            if self.isTimeInterval(RedisTimeFrame.MIN15):
+                self.publish2Min(symbol, RedisTimeFrame.MIN15)
         except Exception as e:
             logging.error(
-                f"Error EVENT_BAR_CANDIDATE.EventBarCandidate.AddBar {e} {data} ")
+                f"Error EVENT_BAR_CANDIDATE.EventBarHandleRealtimeData.AddBar {e} {data} ")
 
     def start(self):
         try:
@@ -62,14 +78,14 @@ class EventBarCandidate:
 
     @staticmethod
     def run():
-        logging.info("EVENT_BAR_CANDIDATE.EventBarCandidate.run")
-        eventBarCandidate = EventBarCandidate()
+        logging.info("EVENT_BAR_CANDIDATE.EventBarHandleRealtimeData.run")
+        eventBarCandidate = EventBarHandleRealtimeData()
         eventBarCandidate.start()
 
 
 if __name__ == "__main__":
-    logging.info("EVENT_BAR_CANDIDATE.EventBarCandidate.run")
-    ebc = EventBarCandidate()
+    logging.info("EVENT_BAR_CANDIDATE.EventBarHandleRealtimeData.run")
+    ebc = EventBarHandleRealtimeData()
     #data2 = ebc.rtb.RedisGetRealtimeData(None, 'MSFT', RedisTimeFrame.MIN2)
     ebc.AddBar()
     # ebc.run()

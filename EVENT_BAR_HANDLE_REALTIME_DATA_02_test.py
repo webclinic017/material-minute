@@ -1,6 +1,6 @@
 from unittest import mock, TestCase
 from testUtil import TestPublisher
-from EVENT_BAR_CANDIDATE import EventBarCandidate
+from EVENT_BAR_HANDLE_REALTIME_DATA_02 import EventBarHandleRealtimeData
 from RedisTimeseriesTable import TimeseriesTable
 from redisUtil import TimeStamp, RedisTimeFrame
 from redisTimeseriesData import RealTimeBars
@@ -33,7 +33,7 @@ class TestEventBarCandidateCheck(TestCase):
         pubPush = TestPublisher(self.doNothing)
         pubSave = TestPublisher(self.doNothing)
         for i in range(5):
-            process1 = EventBarCandidate(pubPush, pubSave)
+            process1 = EventBarHandleRealtimeData(pubPush, pubSave)
             self.timestamp += 60
             self.data['t'] = self.timestamp
             process1.AddBar(self.data)
